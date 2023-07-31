@@ -11,6 +11,8 @@ class Game {
 
     var currentPlayer = 0
 
+    fun Int.currentPlayerExt() = players[this]
+
 
     init {
         for (i in 0..49) {
@@ -67,7 +69,9 @@ class Game {
 
     private fun movePlayerAndAskQuestion(roll: Int) {
         places[currentPlayer] = places[currentPlayer] + roll
+//        players[currentPlayer].place = players[currentPlayer].place + roll
         if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
+//        if (players[currentPlayer].place > 11) players[currentPlayer].place = players[currentPlayer].place - 12
 
         playerLocationMessage(players.get(currentPlayer))
         println("The category is " + currentCategory())
@@ -107,19 +111,20 @@ class Game {
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-        if (players.get(currentPlayer).inPenaltyBox) {
-            if (players.get(currentPlayer).isGettingOutOfPenaltyBox) {
+//        if (players.get(currentPlayer).inPenaltyBox) {
+        if (currentPlayer.currentPlayerExt().inPenaltyBox) {
+            return if (currentPlayer.currentPlayerExt().isGettingOutOfPenaltyBox) {
                 showMessage(Messages.CORRECT_MESSAGE)
                 currentPlayer++
                 if (currentPlayer == players.size) currentPlayer = 0
-                players.get(currentPlayer).coins++
+                currentPlayer.currentPlayerExt().coins++
                 numberOfCoinsMessage(players[currentPlayer])
 
-                return didPlayerWin()
+                didPlayerWin()
             } else {
                 currentPlayer++
                 if (currentPlayer == players.size) currentPlayer = 0
-                return true
+                true
             }
 
 
@@ -149,7 +154,7 @@ class Game {
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(players.get(currentPlayer).name + " was sent to the penalty box")
-        players.get(currentPlayer).inPenaltyBox = true
+        currentPlayer.currentPlayerExt().inPenaltyBox = true
 
         currentPlayer++
         if (currentPlayer == players.size) currentPlayer = 0
@@ -175,3 +180,4 @@ fun MutableList<String>.removeFirst(): String {
 fun MutableList<String>.addLast(element: String) {
     this.add(element)
 }
+
