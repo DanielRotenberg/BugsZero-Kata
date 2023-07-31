@@ -2,13 +2,13 @@ package com.adaptionsoft.games.uglytrivia
 
 class Game {
     val players = mutableListOf<Player>()
-    var places = IntArray(6)
 
     var popQuestions = mutableListOf<String>()
     var scienceQuestions = mutableListOf<String>()
     var sportsQuestions = mutableListOf<String>()
     var rockQuestions = mutableListOf<String>()
 
+    fun currentPlayerObj(index:Int = 0) = players[index]
     var currentPlayer = 0
 
     fun Int.currentPlayerExt() = players[this]
@@ -68,10 +68,9 @@ class Game {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        places[currentPlayer] = places[currentPlayer] + roll
-//        players[currentPlayer].place = players[currentPlayer].place + roll
-        if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
-//        if (players[currentPlayer].place > 11) players[currentPlayer].place = players[currentPlayer].place - 12
+        currentPlayer.currentPlayerExt().place = currentPlayer.currentPlayerExt().place + roll
+        if (currentPlayer.currentPlayerExt().place > 11)
+            currentPlayer.currentPlayerExt().place = currentPlayer.currentPlayerExt().place - 12
 
         playerLocationMessage(players.get(currentPlayer))
         println("The category is " + currentCategory())
@@ -82,7 +81,8 @@ class Game {
         println(
             player.name
                     + "'s new location is "
-                    + places[currentPlayer]
+                    + currentPlayer.currentPlayerExt().place
+//                    + places[currentPlayer]
         )
     }
 
@@ -98,20 +98,19 @@ class Game {
 
     private fun currentCategory(): String {
         return when {
-            places[currentPlayer] == 0 -> "Pop"
-            places[currentPlayer] == 4 -> "Pop"
-            places[currentPlayer] == 8 -> "Pop"
-            places[currentPlayer] == 1 -> "Science"
-            places[currentPlayer] == 5 -> "Science"
-            places[currentPlayer] == 9 -> "Science"
-            places[currentPlayer] == 2 -> "Sports"
-            places[currentPlayer] == 6 -> "Sports"
-            else -> if (places[currentPlayer] == 10) "Sports" else "Rock"
+            currentPlayer.currentPlayerExt().place == 0 -> "Pop"
+            currentPlayer.currentPlayerExt().place == 4 -> "Pop"
+            currentPlayer.currentPlayerExt().place == 8 -> "Pop"
+            currentPlayer.currentPlayerExt().place == 1 -> "Science"
+            currentPlayer.currentPlayerExt().place == 5 -> "Science"
+            currentPlayer.currentPlayerExt().place == 9 -> "Science"
+            currentPlayer.currentPlayerExt().place == 2 -> "Sports"
+            currentPlayer.currentPlayerExt().place == 6 -> "Sports"
+            else -> if (currentPlayer.currentPlayerExt().place == 10) "Sports" else "Rock"
         }
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-//        if (players.get(currentPlayer).inPenaltyBox) {
         if (currentPlayer.currentPlayerExt().inPenaltyBox) {
             return if (currentPlayer.currentPlayerExt().isGettingOutOfPenaltyBox) {
                 showMessage(Messages.CORRECT_MESSAGE)
