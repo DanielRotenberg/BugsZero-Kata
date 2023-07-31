@@ -95,7 +95,7 @@ class Game() {
         true
       }
     } else {
-      println("Answer was corrent!!!!")
+      println("Answer was correct!!!!")
       purses(currentPlayer) += 1
       println(players(currentPlayer) + " now has " + purses(currentPlayer) + " Gold Coins.")
       val winner = didPlayerWin

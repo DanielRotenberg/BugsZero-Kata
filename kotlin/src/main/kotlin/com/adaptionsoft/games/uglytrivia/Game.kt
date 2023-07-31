@@ -1,9 +1,8 @@
 package com.adaptionsoft.games.uglytrivia
 
 class Game {
-    var players = mutableListOf<String>()
+    val players = mutableListOf<Player>()
     var places = IntArray(6)
-    var purses = IntArray(6)
     var inPenaltyBox = BooleanArray(6)
 
     var popQuestions = mutableListOf<String>()
@@ -13,9 +12,6 @@ class Game {
 
     var currentPlayer = 0
     var isGettingOutOfPenaltyBox: Boolean = false
-
-    val isPlayable: Boolean
-        get() = howManyPlayers() >= 2
 
     init {
         for (i in 0..49) {
@@ -32,35 +28,36 @@ class Game {
 
     fun add(playerName: String): Boolean {
 
-        players.add(playerName)
+        players.add(Player(name = playerName))
+
         require(players.size < 7)
 
-        places[howManyPlayers()-1] = 0
-        purses[howManyPlayers()-1] = 0
-        inPenaltyBox[howManyPlayers()-1] = false
+        /* places[howManyPlayers()-1] = 0
+         purses[howManyPlayers()-1] = 0
+         inPenaltyBox[howManyPlayers()-1] = false*/
 
         println(playerName + " was added")
         println("They are player number " + players.size)
         return true
     }
 
-    fun howManyPlayers(): Int {
+/*    fun howManyPlayers(): Int {
         return players.size
-    }
+    }*/
 
     fun roll(roll: Int) {
         require(players.size in 2..<7)
-        println(players.get(currentPlayer) + " is the current player")
+        println(players.get(currentPlayer).name + " is the current player")
         println("They have rolled a " + roll)
 
         if (inPenaltyBox[currentPlayer]) {
             if (roll % 2 != 0) {
                 isGettingOutOfPenaltyBox = true
 
-                println(players.get(currentPlayer) + " is getting out of the penalty box")
+                println(players.get(currentPlayer).name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             } else {
-                println(players.get(currentPlayer) + " is not getting out of the penalty box")
+                println(players.get(currentPlayer).name + " is not getting out of the penalty box")
                 isGettingOutOfPenaltyBox = false
             }
 
@@ -76,7 +73,7 @@ class Game {
         if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
 
         println(
-            players.get(currentPlayer)
+            players.get(currentPlayer).name
                     + "'s new location is "
                     + places[currentPlayer]
         )
@@ -95,28 +92,30 @@ class Game {
 
 
     private fun currentCategory(): String {
-        if (places[currentPlayer] == 0) return "Pop"
-        if (places[currentPlayer] == 4) return "Pop"
-        if (places[currentPlayer] == 8) return "Pop"
-        if (places[currentPlayer] == 1) return "Science"
-        if (places[currentPlayer] == 5) return "Science"
-        if (places[currentPlayer] == 9) return "Science"
-        if (places[currentPlayer] == 2) return "Sports"
-        if (places[currentPlayer] == 6) return "Sports"
-        return if (places[currentPlayer] == 10) "Sports" else "Rock"
+        return when {
+            places[currentPlayer] == 0 -> "Pop"
+            places[currentPlayer] == 4 -> "Pop"
+            places[currentPlayer] == 8 -> "Pop"
+            places[currentPlayer] == 1 -> "Science"
+            places[currentPlayer] == 5 -> "Science"
+            places[currentPlayer] == 9 -> "Science"
+            places[currentPlayer] == 2 -> "Sports"
+            places[currentPlayer] == 6 -> "Sports"
+            else -> if (places[currentPlayer] == 10) "Sports" else "Rock"
+        }
     }
 
     fun wasCorrectlyAnswered(): Boolean {
         if (inPenaltyBox[currentPlayer]) {
             if (isGettingOutOfPenaltyBox) {
-                println("Answer was correct!!!!")
+                showMessage(Messages.CORRECT_MESSAGE)
                 currentPlayer++
                 if (currentPlayer == players.size) currentPlayer = 0
-                purses[currentPlayer]++
+                players.get(currentPlayer).coins++
                 println(
-                    players.get(currentPlayer)
+                    players.get(currentPlayer).name
                             + " now has "
-                            + purses[currentPlayer]
+                            + players.get(currentPlayer).coins
                             + " Gold Coins."
                 )
 
@@ -130,12 +129,12 @@ class Game {
 
         } else {
 
-            println("Answer was corrent!!!!")
-            purses[currentPlayer]++
+            showMessage(Messages.CORRECT_MESSAGE)
+            players.get(currentPlayer).coins++
             println(
-                players.get(currentPlayer)
+                players.get(currentPlayer).name
                         + " now has "
-                        + purses[currentPlayer]
+                        + players.get(currentPlayer).coins
                         + " Gold Coins."
             )
 
@@ -147,9 +146,13 @@ class Game {
         }
     }
 
+    private fun showMessage(content: String) {
+        println(content)
+    }
+
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(players.get(currentPlayer) + " was sent to the penalty box")
+        println(players.get(currentPlayer).name + " was sent to the penalty box")
         inPenaltyBox[currentPlayer] = true
 
         currentPlayer++
@@ -159,9 +162,16 @@ class Game {
 
 
     private fun didPlayerWin(): Boolean {
-        return purses[currentPlayer] != 6
+        return players.get(currentPlayer).coins != 6
+//        return purses[currentPlayer] != 6
     }
 }
+
+
+object Messages {
+    const val CORRECT_MESSAGE = "Answer was correct!!!!"
+}
+
 
 fun MutableList<String>.removeFirst(): String {
     return this.removeAt(0)

@@ -63,8 +63,6 @@ class GameTest {
         assertThrows<IllegalArgumentException> {
             createGameWithPlayers(numOfPlayers = 7)
         }
-
-
     }
 
     @Test
