@@ -29,7 +29,6 @@ import com.adaptionsoft.games.uglytrivia.Game
 import org.approvaltests.Approvals
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.assertThrows
 import java.io.*
 import java.util.*
@@ -59,11 +58,10 @@ class GameTest {
         }
     }
 
-    @Disabled
     @Test
     fun `game can have maximum 6 players`() {
         assertThrows<IllegalArgumentException> {
-            val game = createGameWithPlayers(numOfPlayers = 7)
+            createGameWithPlayers(numOfPlayers = 7)
         }
 
 
