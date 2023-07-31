@@ -50,6 +50,7 @@ class Game {
     }
 
     fun roll(roll: Int) {
+        require(players.size> 1)
         println(players.get(currentPlayer) + " is the current player")
         println("They have rolled a " + roll)
 
