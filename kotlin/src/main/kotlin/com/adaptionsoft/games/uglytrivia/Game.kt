@@ -3,7 +3,6 @@ package com.adaptionsoft.games.uglytrivia
 class Game {
     val players = mutableListOf<Player>()
     var places = IntArray(6)
-    var inPenaltyBox = BooleanArray(6)
 
     var popQuestions = mutableListOf<String>()
     var scienceQuestions = mutableListOf<String>()
@@ -11,7 +10,7 @@ class Game {
     var rockQuestions = mutableListOf<String>()
 
     var currentPlayer = 0
-    var isGettingOutOfPenaltyBox: Boolean = false
+
 
     init {
         for (i in 0..49) {
@@ -32,33 +31,31 @@ class Game {
 
         require(players.size < 7)
 
-        /* places[howManyPlayers()-1] = 0
-         purses[howManyPlayers()-1] = 0
-         inPenaltyBox[howManyPlayers()-1] = false*/
+
 
         println(playerName + " was added")
         println("They are player number " + players.size)
         return true
     }
 
-/*    fun howManyPlayers(): Int {
-        return players.size
-    }*/
+    /*    fun howManyPlayers(): Int {
+            return players.size
+        }*/
 
     fun roll(roll: Int) {
         require(players.size in 2..<7)
         println(players.get(currentPlayer).name + " is the current player")
         println("They have rolled a " + roll)
 
-        if (inPenaltyBox[currentPlayer]) {
+        if (players.get(currentPlayer).inPenaltyBox) {
             if (roll % 2 != 0) {
-                isGettingOutOfPenaltyBox = true
+                players.get(currentPlayer).isGettingOutOfPenaltyBox = true
 
                 println(players.get(currentPlayer).name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             } else {
                 println(players.get(currentPlayer).name + " is not getting out of the penalty box")
-                isGettingOutOfPenaltyBox = false
+                players.get(currentPlayer).isGettingOutOfPenaltyBox = false
             }
 
         } else {
@@ -72,13 +69,17 @@ class Game {
         places[currentPlayer] = places[currentPlayer] + roll
         if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
 
+        playerLocationMessage(players.get(currentPlayer))
+        println("The category is " + currentCategory())
+        askQuestion()
+    }
+
+    private fun playerLocationMessage(player: Player) {
         println(
-            players.get(currentPlayer).name
+            player.name
                     + "'s new location is "
                     + places[currentPlayer]
         )
-        println("The category is " + currentCategory())
-        askQuestion()
     }
 
     private fun askQuestion() {
@@ -106,18 +107,13 @@ class Game {
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-        if (inPenaltyBox[currentPlayer]) {
-            if (isGettingOutOfPenaltyBox) {
+        if (players.get(currentPlayer).inPenaltyBox) {
+            if (players.get(currentPlayer).isGettingOutOfPenaltyBox) {
                 showMessage(Messages.CORRECT_MESSAGE)
                 currentPlayer++
                 if (currentPlayer == players.size) currentPlayer = 0
                 players.get(currentPlayer).coins++
-                println(
-                    players.get(currentPlayer).name
-                            + " now has "
-                            + players.get(currentPlayer).coins
-                            + " Gold Coins."
-                )
+                numberOfCoinsMessage(players[currentPlayer])
 
                 return didPlayerWin()
             } else {
@@ -131,12 +127,7 @@ class Game {
 
             showMessage(Messages.CORRECT_MESSAGE)
             players.get(currentPlayer).coins++
-            println(
-                players.get(currentPlayer).name
-                        + " now has "
-                        + players.get(currentPlayer).coins
-                        + " Gold Coins."
-            )
+            numberOfCoinsMessage(players[currentPlayer])
 
             val winner = didPlayerWin()
             currentPlayer++
@@ -146,6 +137,11 @@ class Game {
         }
     }
 
+    // TODO: convert to extension function
+    private fun numberOfCoinsMessage(player: Player) {
+        println("${player.name} now has ${player.coins} Gold Coins.")
+    }
+
     private fun showMessage(content: String) {
         println(content)
     }
@@ -153,7 +149,7 @@ class Game {
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(players.get(currentPlayer).name + " was sent to the penalty box")
-        inPenaltyBox[currentPlayer] = true
+        players.get(currentPlayer).inPenaltyBox = true
 
         currentPlayer++
         if (currentPlayer == players.size) currentPlayer = 0
@@ -163,7 +159,6 @@ class Game {
 
     private fun didPlayerWin(): Boolean {
         return players.get(currentPlayer).coins != 6
-//        return purses[currentPlayer] != 6
     }
 }
 
