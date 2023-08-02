@@ -26,6 +26,7 @@ package com.adaptionsoft.games.trivia
  */
 import com.adaptionsoft.games.trivia.runner.GameRunner
 import com.adaptionsoft.games.uglytrivia.Game
+import com.adaptionsoft.games.uglytrivia.QuestionsProvider
 import org.approvaltests.Approvals
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -74,7 +75,7 @@ class GameTest {
 
 
 fun createGameWithPlayers(numOfPlayers: Int): Game {
-    return Game().apply {
+    return Game(QuestionsProvider()).apply {
         repeat(numOfPlayers) {
             add("it")
         }

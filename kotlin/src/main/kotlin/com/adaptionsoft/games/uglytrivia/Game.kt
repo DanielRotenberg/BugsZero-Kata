@@ -1,30 +1,11 @@
 package com.adaptionsoft.games.uglytrivia
 
-class Game {
+class Game(private val questions: QuestionsProvider) {
     val players = mutableListOf<Player>()
-
-    var popQuestions = mutableListOf<String>()
-    var scienceQuestions = mutableListOf<String>()
-    var sportsQuestions = mutableListOf<String>()
-    var rockQuestions = mutableListOf<String>()
 
     private var currentPlayerIndex = 0
     private val currentPlayer
         get() = players[currentPlayerIndex]
-
-
-    init {
-        for (i in 0..49) {
-            popQuestions.addLast("Pop Question " + i)
-            scienceQuestions.addLast("Science Question " + i)
-            sportsQuestions.addLast("Sports Question " + i)
-            rockQuestions.addLast(createRockQuestion(i))
-        }
-    }
-
-    fun createRockQuestion(index: Int): String {
-        return "Rock Question " + index
-    }
 
     fun add(playerName: String): Boolean {
         players.add(Player(name = playerName))
@@ -57,42 +38,24 @@ class Game {
     private fun movePlayerAndAskQuestion(roll: Int) {
         currentPlayer.place += roll
         if (currentPlayer.place > 11)
-            currentPlayer.place = currentPlayer.place - 12
+            currentPlayer.place -= 12
 
         playerLocationMessage(currentPlayer)
-        println("The category is " + currentCategory())
-        askQuestion()
+        questions.askQuestion(currentPlayer.place)
     }
 
     private fun playerLocationMessage(player: Player) {
         println("${player.name}'s new location is ${currentPlayer.place}")
     }
 
-    private fun askQuestion() {
-        when (currentCategory()) {
-            "Pop" -> println(popQuestions.removeFirst())
-            "Science" -> println(scienceQuestions.removeFirst())
-            "Sports" -> println(sportsQuestions.removeFirst())
-            "Rock" -> println(rockQuestions.removeFirst())
-        }
-    }
-
-    private fun currentCategory(): String {
-        return when (currentPlayer.place) {
-            0, 4, 8 -> "Pop"
-            1, 5, 9 -> "Science"
-            2, 6 -> "Sports"
-            else -> if (currentPlayer.place == 10) "Sports" else "Rock"
-        }
-    }
 
     fun wasCorrectlyAnswered(): Boolean {
         if (currentPlayer.inPenaltyBox) {
             return if (currentPlayer.isGettingOutOfPenaltyBox) {
-                showMessage(Messages.CORRECT_MESSAGE)
                 setPlayerIndex()
+                println("Answer was correct!!!!")
                 currentPlayer.coins++
-                currentPlayer.numberOfCoinsMessage()
+                println("${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins.")
                 didPlayerWin()
             } else {
                 setPlayerIndex()
@@ -101,21 +64,14 @@ class Game {
 
         } else {
 
-            showMessage(Messages.CORRECT_MESSAGE)
+            println("Answer was correct!!!!")
             currentPlayer.coins++
-            currentPlayer.numberOfCoinsMessage()
+            println("${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins.")
             val winner = didPlayerWin()
             setPlayerIndex()
 
             return winner
         }
-    }
-    private fun Player.numberOfCoinsMessage() {
-        println("$name now has $coins Gold Coins.")
-    }
-
-    private fun showMessage(content: String) {
-        println(content)
     }
 
     fun wrongAnswer(): Boolean {
@@ -136,16 +92,7 @@ class Game {
 }
 
 
-object Messages {
-    const val CORRECT_MESSAGE = "Answer was correct!!!!"
-}
 
 
-fun MutableList<String>.removeFirst(): String {
-    return this.removeAt(0)
-}
 
-fun MutableList<String>.addLast(element: String) {
-    this.add(element)
-}
 
