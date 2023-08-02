@@ -8,10 +8,9 @@ class Game {
     var sportsQuestions = mutableListOf<String>()
     var rockQuestions = mutableListOf<String>()
 
-    fun currentPlayerObj(index:Int = 0) = players[index]
-    var currentPlayer = 0
-
-    fun Int.currentPlayerExt() = players[this]
+    private var currentPlayerIndex = 0
+    private val currentPlayer
+        get() = players[currentPlayerIndex]
 
 
     init {
@@ -28,122 +27,91 @@ class Game {
     }
 
     fun add(playerName: String): Boolean {
-
         players.add(Player(name = playerName))
-
         require(players.size < 7)
-
-
-
-        println(playerName + " was added")
+        println("$playerName was added")
         println("They are player number " + players.size)
         return true
     }
 
-    /*    fun howManyPlayers(): Int {
-            return players.size
-        }*/
-
     fun roll(roll: Int) {
         require(players.size in 2..<7)
-        println(players.get(currentPlayer).name + " is the current player")
-        println("They have rolled a " + roll)
+        println(currentPlayer.name + " is the current player")
+        println("They have rolled a $roll")
 
-        if (players.get(currentPlayer).inPenaltyBox) {
+        if (currentPlayer.inPenaltyBox) {
             if (roll % 2 != 0) {
-                players.get(currentPlayer).isGettingOutOfPenaltyBox = true
-
-                println(players.get(currentPlayer).name + " is getting out of the penalty box")
+                currentPlayer.isGettingOutOfPenaltyBox = true
+                println(currentPlayer.name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             } else {
-                println(players.get(currentPlayer).name + " is not getting out of the penalty box")
-                players.get(currentPlayer).isGettingOutOfPenaltyBox = false
+                println(currentPlayer.name + " is not getting out of the penalty box")
+                currentPlayer.isGettingOutOfPenaltyBox = false
             }
-
         } else {
-
             movePlayerAndAskQuestion(roll)
         }
 
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        currentPlayer.currentPlayerExt().place = currentPlayer.currentPlayerExt().place + roll
-        if (currentPlayer.currentPlayerExt().place > 11)
-            currentPlayer.currentPlayerExt().place = currentPlayer.currentPlayerExt().place - 12
+        currentPlayer.place += roll
+        if (currentPlayer.place > 11)
+            currentPlayer.place = currentPlayer.place - 12
 
-        playerLocationMessage(players.get(currentPlayer))
+        playerLocationMessage(currentPlayer)
         println("The category is " + currentCategory())
         askQuestion()
     }
 
     private fun playerLocationMessage(player: Player) {
-        println(
-            player.name
-                    + "'s new location is "
-                    + currentPlayer.currentPlayerExt().place
-//                    + places[currentPlayer]
-        )
+        println("${player.name}'s new location is ${currentPlayer.place}")
     }
 
     private fun askQuestion() {
-        when {
-            currentCategory() === "Pop" -> println(popQuestions.removeFirst())
-            currentCategory() === "Science" -> println(scienceQuestions.removeFirst())
-            currentCategory() === "Sports" -> println(sportsQuestions.removeFirst())
-            currentCategory() === "Rock" -> println(rockQuestions.removeFirst())
+        when (currentCategory()) {
+            "Pop" -> println(popQuestions.removeFirst())
+            "Science" -> println(scienceQuestions.removeFirst())
+            "Sports" -> println(sportsQuestions.removeFirst())
+            "Rock" -> println(rockQuestions.removeFirst())
         }
     }
 
-
     private fun currentCategory(): String {
-        return when {
-            currentPlayer.currentPlayerExt().place == 0 -> "Pop"
-            currentPlayer.currentPlayerExt().place == 4 -> "Pop"
-            currentPlayer.currentPlayerExt().place == 8 -> "Pop"
-            currentPlayer.currentPlayerExt().place == 1 -> "Science"
-            currentPlayer.currentPlayerExt().place == 5 -> "Science"
-            currentPlayer.currentPlayerExt().place == 9 -> "Science"
-            currentPlayer.currentPlayerExt().place == 2 -> "Sports"
-            currentPlayer.currentPlayerExt().place == 6 -> "Sports"
-            else -> if (currentPlayer.currentPlayerExt().place == 10) "Sports" else "Rock"
+        return when (currentPlayer.place) {
+            0, 4, 8 -> "Pop"
+            1, 5, 9 -> "Science"
+            2, 6 -> "Sports"
+            else -> if (currentPlayer.place == 10) "Sports" else "Rock"
         }
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-        if (currentPlayer.currentPlayerExt().inPenaltyBox) {
-            return if (currentPlayer.currentPlayerExt().isGettingOutOfPenaltyBox) {
+        if (currentPlayer.inPenaltyBox) {
+            return if (currentPlayer.isGettingOutOfPenaltyBox) {
                 showMessage(Messages.CORRECT_MESSAGE)
-                currentPlayer++
-                if (currentPlayer == players.size) currentPlayer = 0
-                currentPlayer.currentPlayerExt().coins++
-                numberOfCoinsMessage(players[currentPlayer])
-
+                setPlayerIndex()
+                currentPlayer.coins++
+                currentPlayer.numberOfCoinsMessage()
                 didPlayerWin()
             } else {
-                currentPlayer++
-                if (currentPlayer == players.size) currentPlayer = 0
+                setPlayerIndex()
                 true
             }
-
 
         } else {
 
             showMessage(Messages.CORRECT_MESSAGE)
-            players.get(currentPlayer).coins++
-            numberOfCoinsMessage(players[currentPlayer])
-
+            currentPlayer.coins++
+            currentPlayer.numberOfCoinsMessage()
             val winner = didPlayerWin()
-            currentPlayer++
-            if (currentPlayer == players.size) currentPlayer = 0
+            setPlayerIndex()
 
             return winner
         }
     }
-
-    // TODO: convert to extension function
-    private fun numberOfCoinsMessage(player: Player) {
-        println("${player.name} now has ${player.coins} Gold Coins.")
+    private fun Player.numberOfCoinsMessage() {
+        println("$name now has $coins Gold Coins.")
     }
 
     private fun showMessage(content: String) {
@@ -152,18 +120,19 @@ class Game {
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(players.get(currentPlayer).name + " was sent to the penalty box")
-        currentPlayer.currentPlayerExt().inPenaltyBox = true
+        println(currentPlayer.name + " was sent to the penalty box")
+        currentPlayer.inPenaltyBox = true
 
-        currentPlayer++
-        if (currentPlayer == players.size) currentPlayer = 0
+        setPlayerIndex()
         return true
     }
 
-
-    private fun didPlayerWin(): Boolean {
-        return players.get(currentPlayer).coins != 6
+    private fun setPlayerIndex() {
+        currentPlayerIndex++
+        if (currentPlayerIndex == players.size) currentPlayerIndex = 0
     }
+
+    private fun didPlayerWin(): Boolean = currentPlayer.coins != 6
 }
 
 
