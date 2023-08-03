@@ -20,19 +20,30 @@ class Game(private val questions: QuestionsProvider) {
         println(currentPlayer.name + " is the current player")
         println("They have rolled a $roll")
 
-        if (currentPlayer.inPenaltyBox) {
-            if (roll % 2 != 0) {
-                currentPlayer.isGettingOutOfPenaltyBox = true
-                println(currentPlayer.name + " is getting out of the penalty box")
-                movePlayerAndAskQuestion(roll)
-            } else {
-                println(currentPlayer.name + " is not getting out of the penalty box")
-                currentPlayer.isGettingOutOfPenaltyBox = false
+        when {
+            currentPlayer.rollForbidden(roll) -> {
+                updatePlayerGettingOutTo(false)
+                return
             }
-        } else {
-            movePlayerAndAskQuestion(roll)
-        }
 
+            currentPlayer.canRollWithPenalty(roll) -> {
+                updatePlayerGettingOutTo(true)
+            }
+        }
+        movePlayerAndAskQuestion(roll)
+    }
+
+    private fun Player.rollForbidden(num: Int) = inPenaltyBox && !canGetOut(num)
+
+    private fun Player.canGetOut(num: Int) = num % 2 != 0
+
+    private fun Player.canRollWithPenalty(num: Int) = inPenaltyBox && canGetOut(num)
+
+
+    private fun updatePlayerGettingOutTo(gettingOut: Boolean) {
+        currentPlayer.isGettingOutOfPenaltyBox = gettingOut
+        val messageParam = if (gettingOut) "" else " not"
+        println(currentPlayer.name + " is$messageParam getting out of the penalty box")
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
@@ -40,50 +51,49 @@ class Game(private val questions: QuestionsProvider) {
         if (currentPlayer.place > 11)
             currentPlayer.place -= 12
 
-        playerLocationMessage(currentPlayer)
+        println("${currentPlayer.name}'s new location is ${currentPlayer.place}")
         questions.askQuestion(currentPlayer.place)
     }
 
-    private fun playerLocationMessage(player: Player) {
-        println("${player.name}'s new location is ${currentPlayer.place}")
-    }
 
-
+    // false result will terminate the game
     fun wasCorrectlyAnswered(): Boolean {
-        if (currentPlayer.inPenaltyBox) {
-            return if (currentPlayer.isGettingOutOfPenaltyBox) {
-                setPlayerIndex()
+        return when {
+            currentPlayer.inPenaltyBox && currentPlayer.isGettingOutOfPenaltyBox -> {
+                updatePlayerIndex()
                 println("Answer was correct!!!!")
                 currentPlayer.coins++
                 println("${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins.")
                 didPlayerWin()
-            } else {
-                setPlayerIndex()
+            }
+
+            // player blocked
+            currentPlayer.inPenaltyBox && !currentPlayer.isGettingOutOfPenaltyBox -> {
+                updatePlayerIndex()
                 true
             }
 
-        } else {
+            // !currentPlayer.inPenaltyBox
+            else -> {
+                println("Answer was correct!!!!")
+                currentPlayer.coins++
+                println("${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins.")
 
-            println("Answer was correct!!!!")
-            currentPlayer.coins++
-            println("${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins.")
-            val winner = didPlayerWin()
-            setPlayerIndex()
-
-            return winner
+                return didPlayerWin().also { updatePlayerIndex() }
+            }
         }
     }
+
+//    private fun Player.
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(currentPlayer.name + " was sent to the penalty box")
         currentPlayer.inPenaltyBox = true
-
-        setPlayerIndex()
-        return true
+        return true.also { updatePlayerIndex() }
     }
 
-    private fun setPlayerIndex() {
+    private fun updatePlayerIndex() {
         currentPlayerIndex++
         if (currentPlayerIndex == players.size) currentPlayerIndex = 0
     }
