@@ -1,15 +1,12 @@
 package com.adaptionsoft.games.uglytrivia
 
-class Player(val name: String, var place: Int = 0, var coins: Int = 0, var inPenaltyBox: Boolean = false) {
+class Player(val name: String, var place: Int = 0, var purse: Int = 0, var inPenaltyBox: Boolean = false) {
 
 }
 
 class Game {
     val players1 = mutableListOf<Player>()
     val players = mutableListOf<String>()
-    val places = IntArray(6) { 0 }
-    val purses = IntArray(6) { 0 }
-//    var inPenaltyBox = BooleanArray(6) { false }
 
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
@@ -20,15 +17,14 @@ class Game {
     var currentPlayer = 0
     var isGettingOutOfPenaltyBox: Boolean = false
 
-    fun setPlaces(index: Int, roll: Int) {
-        places[index] = places[index] + roll
-        if (places[index] > 11) places[index]  -= 12
+    private fun setPlaces(index: Int, roll: Int) {
         players1[index].place += roll //?? carefully not to introduce bug
         if (players1[index].place > 11) players1[index].place -= 12
     }
 
-    fun getPlaces(index: Int): Int {
-        return places[index]
+    private fun getPlaces(index: Int): Int {
+        return players1[index].place
+
     }
 
     /*  val isPlayable: Boolean
@@ -45,22 +41,21 @@ class Game {
         players.add(playerName)
 
         println("$playerName was added")
-        println("They are player number " + players.size)
+        println("They are player number " + players1.size)
+//        println("They are player number " + players.size)
 
         return true
     }
 
-    fun setIsInPenalty(value: Boolean, position: Int) {
-
-    }
 
     fun roll(roll: Int) {
         require(players.size > 1)
         require(players1.size > 1)
-        println(players[currentPlayer] + " is the current player")
+//        println(players[currentPlayer] + " is the current player")
+        println(players1[currentPlayer].name + " is the current player")
         println("They have rolled a $roll")
 
-        if (players1[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
+        if (players1[currentPlayer].inPenaltyBox ) {
             if (roll % 2 == 0) {
                 println(players[currentPlayer] + " is not getting out of the penalty box")
                 isGettingOutOfPenaltyBox = false
@@ -126,7 +121,7 @@ class Game {
 
 
     private fun currentCategory(): String {
-        val currentCategory = places[currentPlayer]
+        val currentCategory = getPlaces(currentPlayer)
         return when (currentCategory) {
             0, 4, 8 -> "Pop"
             1, 5, 9 -> "Science"
@@ -141,8 +136,8 @@ class Game {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
-                purses[currentPlayer]++
-                val playerCoins = currentPlayerGoldCoins(players[currentPlayer], purses[currentPlayer])
+                setPurse(currentPlayer)
+                val playerCoins = currentPlayerGoldCoins(players[currentPlayer], getPurse(currentPlayer))
                 println(playerCoins)
 
                 return didPlayerWin()
@@ -155,8 +150,9 @@ class Game {
         } else {
 
             println("Answer was corrent!!!!")
-            purses[currentPlayer]++
-            val playerCoins = currentPlayerGoldCoins(players[currentPlayer], purses[currentPlayer])
+            setPurse(currentPlayer)
+
+            val playerCoins = currentPlayerGoldCoins(players[currentPlayer], getPurse(currentPlayer))
             println(playerCoins)
             val winner = didPlayerWin()
 
@@ -188,7 +184,6 @@ let card = deckOfCards[cardIndex]
         println("Question was incorrectly answered")
         println(players[currentPlayer] + " was sent to the penalty box")
         putPlayerInPenaltyBox(currentPlayer)
-//        inPenaltyBox[currentPlayer] = true
 
         moveToNextPlayer()
         return true
@@ -203,12 +198,20 @@ let card = deckOfCards[cardIndex]
 
 
     private fun didPlayerWin(): Boolean {
-        return purses[currentPlayer] != 6
+        return getPurse(currentPlayer) != 6
     }
 
     private fun putPlayerInPenaltyBox(index: Int) {
-//        inPenaltyBox[index] = true
         players1[index].inPenaltyBox = true
+    }
+
+    private fun setPurse(index: Int) {
+        players1[index].purse++
+
+    }
+
+    private fun getPurse(index: Int): Int {
+        return players1[index].purse
     }
 }
 
