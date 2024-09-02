@@ -68,12 +68,10 @@ class Game {
         if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
 
         println(
-            players[currentPlayer]
-                    + "'s new location is "
-                    + places[currentPlayer]
+            "${players[currentPlayer]}'s new location is ${places[currentPlayer]}"
         )
         // can group this together and extract pure function?
-        println("The category is " + currentCategory())
+        println("The category is ${currentCategory()}")
         val question = askQuestion()
         println(question)
     }
@@ -180,7 +178,9 @@ let card = deckOfCards[cardIndex]
 
     private fun moveToNextPlayer() {
         currentPlayer++
-        if (currentPlayer == players.size) currentPlayer = 0
+        currentPlayer %= players.size
+       /* currentPlayer++
+        if (currentPlayer == players.size) currentPlayer = 0*/
     }
 
 
