@@ -7,9 +7,9 @@ class Player(val name: String, var place: Int = 0, var coins: Int = 0, var inPen
 class Game {
     val players1 = mutableListOf<Player>()
     val players = mutableListOf<String>()
-    val places = IntArray(6){0}
-    val purses = IntArray(6){0}
-    var inPenaltyBox = BooleanArray(6) { false }
+    val places = IntArray(6) { 0 }
+    val purses = IntArray(6) { 0 }
+//    var inPenaltyBox = BooleanArray(6) { false }
 
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
@@ -19,6 +19,17 @@ class Game {
     )
     var currentPlayer = 0
     var isGettingOutOfPenaltyBox: Boolean = false
+
+    fun setPlaces(index: Int, roll: Int) {
+        places[index] = places[index] + roll
+        if (places[index] > 11) places[index]  -= 12
+        players1[index].place += roll //?? carefully not to introduce bug
+        if (players1[index].place > 11) players1[index].place -= 12
+    }
+
+    fun getPlaces(index: Int): Int {
+        return places[index]
+    }
 
     /*  val isPlayable: Boolean
           get() = howManyPlayers() >= 2*/
@@ -49,7 +60,7 @@ class Game {
         println(players[currentPlayer] + " is the current player")
         println("They have rolled a $roll")
 
-        if (inPenaltyBox[currentPlayer]) {
+        if (players1[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
             if (roll % 2 == 0) {
                 println(players[currentPlayer] + " is not getting out of the penalty box")
                 isGettingOutOfPenaltyBox = false
@@ -68,11 +79,13 @@ class Game {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        places[currentPlayer] = places[currentPlayer] + roll
-        if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
+//        places[currentPlayer] = places[currentPlayer] + roll
+        setPlaces(currentPlayer, roll)
+
 
         println(
-            "${players[currentPlayer]}'s new location is ${places[currentPlayer]}"
+//            "${players[currentPlayer]}'s new location is ${places[currentPlayer]}"
+            "${players[currentPlayer]}'s new location is ${getPlaces(currentPlayer)}"
         )
         // can group this together and extract pure function?
         println("The category is ${currentCategory()}")
@@ -124,7 +137,7 @@ class Game {
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-        if (inPenaltyBox[currentPlayer]) {
+        if (players1[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
@@ -174,7 +187,8 @@ let card = deckOfCards[cardIndex]
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(players[currentPlayer] + " was sent to the penalty box")
-        inPenaltyBox[currentPlayer] = true
+        putPlayerInPenaltyBox(currentPlayer)
+//        inPenaltyBox[currentPlayer] = true
 
         moveToNextPlayer()
         return true
@@ -190,6 +204,11 @@ let card = deckOfCards[cardIndex]
 
     private fun didPlayerWin(): Boolean {
         return purses[currentPlayer] != 6
+    }
+
+    private fun putPlayerInPenaltyBox(index: Int) {
+//        inPenaltyBox[index] = true
+        players1[index].inPenaltyBox = true
     }
 }
 
