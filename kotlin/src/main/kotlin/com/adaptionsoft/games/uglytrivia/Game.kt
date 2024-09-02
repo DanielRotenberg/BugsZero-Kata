@@ -1,10 +1,15 @@
 package com.adaptionsoft.games.uglytrivia
 
+class Player(val name: String, var place: Int = 0, var coins: Int = 0, var inPenaltyBox: Boolean = false) {
+
+}
+
 class Game {
+    val players1 = mutableListOf<Player>()
     val players = mutableListOf<String>()
-    val places = IntArray(6)
-    val purses = IntArray(6)
-    var inPenaltyBox = BooleanArray(6)
+    val places = IntArray(6){0}
+    val purses = IntArray(6){0}
+    var inPenaltyBox = BooleanArray(6) { false }
 
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
@@ -25,23 +30,22 @@ class Game {
 
     fun add(playerName: String): Boolean {
 
-
+        players1.add(Player(name = playerName))
         players.add(playerName)
-        places[howManyPlayers()] = 0
-        purses[howManyPlayers()] = 0
-        inPenaltyBox[howManyPlayers()] = false
 
         println("$playerName was added")
         println("They are player number " + players.size)
+
         return true
     }
 
-    fun howManyPlayers(): Int {
-        return players.size
+    fun setIsInPenalty(value: Boolean, position: Int) {
+
     }
 
     fun roll(roll: Int) {
         require(players.size > 1)
+        require(players1.size > 1)
         println(players[currentPlayer] + " is the current player")
         println("They have rolled a $roll")
 
@@ -179,8 +183,8 @@ let card = deckOfCards[cardIndex]
     private fun moveToNextPlayer() {
         currentPlayer++
         currentPlayer %= players.size
-       /* currentPlayer++
-        if (currentPlayer == players.size) currentPlayer = 0*/
+        /* currentPlayer++
+         if (currentPlayer == players.size) currentPlayer = 0*/
     }
 
 
