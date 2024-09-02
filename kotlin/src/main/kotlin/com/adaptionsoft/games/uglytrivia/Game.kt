@@ -46,14 +46,14 @@ class Game {
         println("They have rolled a $roll")
 
         if (inPenaltyBox[currentPlayer]) {
-            if (roll % 2 != 0) {
+            if (roll % 2 == 0) {
+                println(players[currentPlayer] + " is not getting out of the penalty box")
+                isGettingOutOfPenaltyBox = false
+            } else {
                 isGettingOutOfPenaltyBox = true
 
                 println(players[currentPlayer] + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
-            } else {
-                println(players[currentPlayer] + " is not getting out of the penalty box")
-                isGettingOutOfPenaltyBox = false
             }
 
         } else {
@@ -78,11 +78,9 @@ class Game {
         println(question)
     }
 
-    //Map<Category,List<Question>>
 
-
-    private fun askQuestion():String {
-       return removeFirstQuestionOf(Category.valueOf(currentCategory()))
+    private fun askQuestion(): String {
+        return removeFirstQuestionOf(Category.valueOf(currentCategory()))
 
     }
 
@@ -127,19 +125,13 @@ class Game {
         if (inPenaltyBox[currentPlayer]) {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
-                currentPlayer++
                 moveToNextPlayer()
                 purses[currentPlayer]++
-                println(
-                    players[currentPlayer]
-                            + " now has "
-                            + purses[currentPlayer]
-                            + " Gold Coins."
-                )
+                val playerCoins = currentPlayerGoldCoins(players[currentPlayer], purses[currentPlayer])
+                println(playerCoins)
 
                 return didPlayerWin()
             } else {
-                currentPlayer++
                 moveToNextPlayer()
                 return true
             }
@@ -149,19 +141,18 @@ class Game {
 
             println("Answer was corrent!!!!")
             purses[currentPlayer]++
-            println(
-                players[currentPlayer]
-                        + " now has "
-                        + purses[currentPlayer]
-                        + " Gold Coins."
-            )
-
+            val playerCoins = currentPlayerGoldCoins(players[currentPlayer], purses[currentPlayer])
+            println(playerCoins)
             val winner = didPlayerWin()
-            currentPlayer++
+
             moveToNextPlayer()
 
             return winner
         }
+    }
+
+    private fun currentPlayerGoldCoins(player: String, purse: Int): String {
+        return "$player now has $purse Gold Coins."
     }
 
     /*
@@ -183,12 +174,12 @@ let card = deckOfCards[cardIndex]
         println(players[currentPlayer] + " was sent to the penalty box")
         inPenaltyBox[currentPlayer] = true
 
-        currentPlayer++
         moveToNextPlayer()
         return true
     }
 
     private fun moveToNextPlayer() {
+        currentPlayer++
         if (currentPlayer == players.size) currentPlayer = 0
     }
 
