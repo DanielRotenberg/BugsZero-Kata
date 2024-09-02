@@ -32,7 +32,7 @@ class Game {
         purses[howManyPlayers()] = 0
         inPenaltyBox[howManyPlayers()] = false
 
-        println(playerName + " was added")
+        println("$playerName was added")
         println("They are player number " + players.size)
         return true
     }
@@ -43,17 +43,17 @@ class Game {
 
     fun roll(roll: Int) {
         require(players.size > 1)
-        println(players.get(currentPlayer) + " is the current player")
-        println("They have rolled a " + roll)
+        println(players[currentPlayer] + " is the current player")
+        println("They have rolled a $roll")
 
         if (inPenaltyBox[currentPlayer]) {
             if (roll % 2 != 0) {
                 isGettingOutOfPenaltyBox = true
 
-                println(players.get(currentPlayer) + " is getting out of the penalty box")
+                println(players[currentPlayer] + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             } else {
-                println(players.get(currentPlayer) + " is not getting out of the penalty box")
+                println(players[currentPlayer] + " is not getting out of the penalty box")
                 isGettingOutOfPenaltyBox = false
             }
 
@@ -100,7 +100,7 @@ class Game {
     enum class Category {
         Pop, Science, Sports, Rock;
 
-        fun typeOf(category: String): Category {
+   /*     fun typeOf(category: String): Category {
             return when (category) {
                 "Pop" -> Pop
                 "Science" -> Science
@@ -115,7 +115,7 @@ class Game {
             Science -> "Science Question"
             Sports -> "Sports Question"
             Rock -> "Rock Question"
-        }
+        }*/
     }
 
 
@@ -135,10 +135,10 @@ class Game {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 currentPlayer++
-                if (currentPlayer == players.size) currentPlayer = 0
+                moveToNextPlayer()
                 purses[currentPlayer]++
                 println(
-                    players.get(currentPlayer)
+                    players[currentPlayer]
                             + " now has "
                             + purses[currentPlayer]
                             + " Gold Coins."
@@ -147,7 +147,7 @@ class Game {
                 return didPlayerWin()
             } else {
                 currentPlayer++
-                if (currentPlayer == players.size) currentPlayer = 0
+                moveToNextPlayer()
                 return true
             }
 
@@ -157,7 +157,7 @@ class Game {
             println("Answer was corrent!!!!")
             purses[currentPlayer]++
             println(
-                players.get(currentPlayer)
+                players[currentPlayer]
                         + " now has "
                         + purses[currentPlayer]
                         + " Gold Coins."
@@ -165,20 +165,38 @@ class Game {
 
             val winner = didPlayerWin()
             currentPlayer++
-            if (currentPlayer == players.size) currentPlayer = 0
+            moveToNextPlayer()
 
             return winner
         }
     }
 
+    /*
+    * cardIndex = cardIndex + someStep
+if (cardIndex > cards.length) {
+  cardIndex = 0
+}
+let card = cards[cardIndex]
+
+// Use of a modulo would be simpler and less error-prone.
+
+cardIndex = (cardIndex + someIndex) % deckOfCards.length
+let card = deckOfCards[cardIndex]
+    *
+    * */
+
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(players.get(currentPlayer) + " was sent to the penalty box")
+        println(players[currentPlayer] + " was sent to the penalty box")
         inPenaltyBox[currentPlayer] = true
 
         currentPlayer++
-        if (currentPlayer == players.size) currentPlayer = 0
+        moveToNextPlayer()
         return true
+    }
+
+    private fun moveToNextPlayer() {
+        if (currentPlayer == players.size) currentPlayer = 0
     }
 
 
