@@ -5,8 +5,7 @@ class Player(val name: String, var place: Int = 0, var purse: Int = 0, var inPen
 }
 
 class Game {
-    val players1 = mutableListOf<Player>()
-    val players = mutableListOf<String>()
+    private val players = mutableListOf<Player>()
 
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
@@ -18,12 +17,12 @@ class Game {
     var isGettingOutOfPenaltyBox: Boolean = false
 
     private fun setPlaces(index: Int, roll: Int) {
-        players1[index].place += roll //?? carefully not to introduce bug
-        if (players1[index].place > 11) players1[index].place -= 12
+        players[index].place += roll //?? carefully not to introduce bug
+        if (players[index].place > 11) players[index].place -= 12
     }
 
     private fun getPlaces(index: Int): Int {
-        return players1[index].place
+        return players[index].place
 
     }
 
@@ -37,12 +36,10 @@ class Game {
 
     fun add(playerName: String): Boolean {
 
-        players1.add(Player(name = playerName))
-        players.add(playerName)
+        players.add(Player(name = playerName))
 
         println("$playerName was added")
-        println("They are player number " + players1.size)
-//        println("They are player number " + players.size)
+        println("They are player number " + players.size)
 
         return true
     }
@@ -50,19 +47,17 @@ class Game {
 
     fun roll(roll: Int) {
         require(players.size > 1)
-        require(players1.size > 1)
-//        println(players[currentPlayer] + " is the current player")
-        println(players1[currentPlayer].name + " is the current player")
+        println(players[currentPlayer].name + " is the current player")
         println("They have rolled a $roll")
 
-        if (players1[currentPlayer].inPenaltyBox ) {
+        if (players[currentPlayer].inPenaltyBox ) {
             if (roll % 2 == 0) {
-                println(players[currentPlayer] + " is not getting out of the penalty box")
+                println(players[currentPlayer].name + " is not getting out of the penalty box")
                 isGettingOutOfPenaltyBox = false
             } else {
                 isGettingOutOfPenaltyBox = true
 
-                println(players[currentPlayer] + " is getting out of the penalty box")
+                println(players[currentPlayer].name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             }
 
@@ -74,15 +69,12 @@ class Game {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-//        places[currentPlayer] = places[currentPlayer] + roll
         setPlaces(currentPlayer, roll)
 
 
         println(
-//            "${players[currentPlayer]}'s new location is ${places[currentPlayer]}"
-            "${players[currentPlayer]}'s new location is ${getPlaces(currentPlayer)}"
+            "${players[currentPlayer].name}'s new location is ${getPlaces(currentPlayer)}"
         )
-        // can group this together and extract pure function?
         println("The category is ${currentCategory()}")
         val question = askQuestion()
         println(question)
@@ -132,12 +124,12 @@ class Game {
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-        if (players1[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
+        if (players[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
                 setPurse(currentPlayer)
-                val playerCoins = currentPlayerGoldCoins(players[currentPlayer], getPurse(currentPlayer))
+                val playerCoins = currentPlayerGoldCoins(players[currentPlayer].name, getPurse(currentPlayer))
                 println(playerCoins)
 
                 return didPlayerWin()
@@ -152,7 +144,7 @@ class Game {
             println("Answer was corrent!!!!")
             setPurse(currentPlayer)
 
-            val playerCoins = currentPlayerGoldCoins(players[currentPlayer], getPurse(currentPlayer))
+            val playerCoins = currentPlayerGoldCoins(players[currentPlayer].name, getPurse(currentPlayer))
             println(playerCoins)
             val winner = didPlayerWin()
 
@@ -182,7 +174,7 @@ let card = deckOfCards[cardIndex]
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(players[currentPlayer] + " was sent to the penalty box")
+        println(players[currentPlayer].name + " was sent to the penalty box")
         putPlayerInPenaltyBox(currentPlayer)
 
         moveToNextPlayer()
@@ -202,16 +194,16 @@ let card = deckOfCards[cardIndex]
     }
 
     private fun putPlayerInPenaltyBox(index: Int) {
-        players1[index].inPenaltyBox = true
+        players[index].inPenaltyBox = true
     }
 
     private fun setPurse(index: Int) {
-        players1[index].purse++
+        players[index].purse++
 
     }
 
     private fun getPurse(index: Int): Int {
-        return players1[index].purse
+        return players[index].purse
     }
 }
 
