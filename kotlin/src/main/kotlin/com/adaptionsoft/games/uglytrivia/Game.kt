@@ -53,17 +53,16 @@ class Game {
     fun roll(roll: Int) {
         require(players.size > 1)
         println(currentPlayer1!!.name + " is the current player")
-//        println(players[currentPlayer].name + " is the current player")
         println("They have rolled a $roll")
 
-        if (players[currentPlayer].inPenaltyBox) {
+        if (currentPlayer1!!.inPenaltyBox) {
             if (roll % 2 == 0) {
-                println(players[currentPlayer].name + " is not getting out of the penalty box")
-                players[currentPlayer].isGettingOutOfPenaltyBox = false
+                println(currentPlayer1!!.name + " is not getting out of the penalty box")
+                currentPlayer1!!.isGettingOutOfPenaltyBox = false
             } else {
-                players[currentPlayer].isGettingOutOfPenaltyBox = true
+                currentPlayer1!!.isGettingOutOfPenaltyBox = true
 
-                println(players[currentPlayer].name + " is getting out of the penalty box")
+                println(currentPlayer1!!.name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             }
 
@@ -79,7 +78,7 @@ class Game {
 
 
         println(
-            "${players[currentPlayer].name}'s new location is ${getPlaces(currentPlayer)}"
+            "${currentPlayer1!!.name}'s new location is ${getPlaces(currentPlayer)}"
         )
         println("The category is ${currentCategory()}")
         val question = askQuestion()
@@ -130,12 +129,12 @@ class Game {
     }
 
     fun wasCorrectlyAnswered(): Boolean {
-        if (players[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
-            if (players[currentPlayer].isGettingOutOfPenaltyBox) {
+        if (currentPlayer1!!.inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
+            if (currentPlayer1!!.isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
                 setPurse(currentPlayer)
-                val playerCoins = currentPlayerGoldCoins(players[currentPlayer].name, getPurse(currentPlayer))
+                val playerCoins = currentPlayerGoldCoins(currentPlayer1!!.name, getPurse(currentPlayer))
                 println(playerCoins)
 
                 return didPlayerWin()
@@ -150,7 +149,7 @@ class Game {
             println("Answer was corrent!!!!")
             setPurse(currentPlayer)
 
-            val playerCoins = currentPlayerGoldCoins(players[currentPlayer].name, getPurse(currentPlayer))
+            val playerCoins = currentPlayerGoldCoins(currentPlayer1!!.name, getPurse(currentPlayer))
             println(playerCoins)
             val winner = didPlayerWin()
 
@@ -180,7 +179,7 @@ let card = deckOfCards[cardIndex]
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(players[currentPlayer].name + " was sent to the penalty box")
+        println(currentPlayer1!!.name + " was sent to the penalty box")
         putPlayerInPenaltyBox(currentPlayer)
 
         moveToNextPlayer()
@@ -196,20 +195,24 @@ let card = deckOfCards[cardIndex]
 
 
     private fun didPlayerWin(): Boolean {
-        return getPurse(currentPlayer) != 6
+        return currentPlayer1!!.purse != 6
+//        return getPurse(currentPlayer) != 6
     }
 
     private fun putPlayerInPenaltyBox(index: Int) {
-        players[index].inPenaltyBox = true
+        currentPlayer1!!.inPenaltyBox = true
+//        players[index].inPenaltyBox = true
     }
 
     private fun setPurse(index: Int) {
-        players[index].purse++
+        currentPlayer1!!.purse++
+//        players[index].purse++
 
     }
 
     private fun getPurse(index: Int): Int {
-        return players[index].purse
+        return currentPlayer1!!.purse
+//        return players[index].purse
     }
 }
 
