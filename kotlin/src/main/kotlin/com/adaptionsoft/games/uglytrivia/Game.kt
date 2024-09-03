@@ -1,8 +1,12 @@
 package com.adaptionsoft.games.uglytrivia
 
-class Player(val name: String, var place: Int = 0, var purse: Int = 0, var inPenaltyBox: Boolean = false) {
-
-}
+class Player(
+    val name: String,
+    var place: Int = 0,
+    var purse: Int = 0,
+    var inPenaltyBox: Boolean = false,
+    var isGettingOutOfPenaltyBox: Boolean = false
+)
 
 class Game {
     private val players = mutableListOf<Player>()
@@ -14,7 +18,8 @@ class Game {
         createQuestionsOf(Category.Rock, 49)
     )
     var currentPlayer = 0
-    var isGettingOutOfPenaltyBox: Boolean = false
+     var currentPlayer1 :Player? = null
+         get() = players[currentPlayer]
 
     private fun setPlaces(index: Int, roll: Int) {
         players[index].place += roll //?? carefully not to introduce bug
@@ -47,15 +52,16 @@ class Game {
 
     fun roll(roll: Int) {
         require(players.size > 1)
-        println(players[currentPlayer].name + " is the current player")
+        println(currentPlayer1!!.name + " is the current player")
+//        println(players[currentPlayer].name + " is the current player")
         println("They have rolled a $roll")
 
-        if (players[currentPlayer].inPenaltyBox ) {
+        if (players[currentPlayer].inPenaltyBox) {
             if (roll % 2 == 0) {
                 println(players[currentPlayer].name + " is not getting out of the penalty box")
-                isGettingOutOfPenaltyBox = false
+                players[currentPlayer].isGettingOutOfPenaltyBox = false
             } else {
-                isGettingOutOfPenaltyBox = true
+                players[currentPlayer].isGettingOutOfPenaltyBox = true
 
                 println(players[currentPlayer].name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
@@ -125,7 +131,7 @@ class Game {
 
     fun wasCorrectlyAnswered(): Boolean {
         if (players[currentPlayer].inPenaltyBox /*inPenaltyBox[currentPlayer]*/) {
-            if (isGettingOutOfPenaltyBox) {
+            if (players[currentPlayer].isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
                 setPurse(currentPlayer)
