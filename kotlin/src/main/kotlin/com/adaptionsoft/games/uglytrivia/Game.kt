@@ -6,7 +6,15 @@ class Player(
     var purse: Int = 0,
     var inPenaltyBox: Boolean = false,
     var isGettingOutOfPenaltyBox: Boolean = false
-)
+) {
+    fun updatePlace(roll: Int) {
+        // incrementing the index, carefully not to introduce bug
+        place += roll
+        if (place > 11) place -= 12
+
+    }
+
+}
 
 class Game {
     private val players = mutableListOf<Player>()
@@ -18,17 +26,15 @@ class Game {
         createQuestionsOf(Category.Rock, 49)
     )
     var currentPlayer = 0
-     var currentPlayer1 :Player? = null
-         get() = players[currentPlayer]
+    var currentPlayer1: Player? = null
+        get() = players[currentPlayer]
 
-    private fun setPlaces(index: Int, roll: Int) {
-        players[index].place += roll //?? carefully not to introduce bug
-        if (players[index].place > 11) players[index].place -= 12
-    }
 
-    private fun getPlaces(index: Int): Int {
-        return players[index].place
-
+    private fun moveToNextPlayer() {
+        currentPlayer++
+        currentPlayer %= players.size
+        /* currentPlayer++
+         if (currentPlayer == players.size) currentPlayer = 0*/
     }
 
     /*  val isPlayable: Boolean
@@ -74,25 +80,19 @@ class Game {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        setPlaces(currentPlayer, roll)
+        currentPlayer1!!.updatePlace(roll)
 
+        println("${currentPlayer1!!.name}'s new location is ${currentPlayer1!!.place}")
+        println("The category is ${currentCategory(currentPlayer1!!.place)}")
 
-        println(
-            "${currentPlayer1!!.name}'s new location is ${getPlaces(currentPlayer)}"
-        )
-        println("The category is ${currentCategory()}")
-        val question = askQuestion()
+        val question = askQuestion(currentPlayer1!!.place)
         println(question)
     }
 
 
-    private fun askQuestion(): String {
-        return removeFirstQuestionOf(Category.valueOf(currentCategory()))
+    private fun askQuestion(category: Int): String {
+        return questions[Category.valueOf(currentCategory(category))]!!.removeFirst()
 
-    }
-
-    private fun removeFirstQuestionOf(category: Category): String {
-        return questions[category]!!.removeFirst()
     }
 
     enum class Category {
@@ -117,15 +117,11 @@ class Game {
     }
 
 
-    private fun currentCategory(): String {
-        val currentCategory = getPlaces(currentPlayer)
-        return when (currentCategory) {
-            0, 4, 8 -> "Pop"
-            1, 5, 9 -> "Science"
-            2, 6, 10 -> "Sports"
-            else -> "Rock"
-        }
-
+    private fun currentCategory(category: Int): String = when (category) {
+        0, 4, 8 -> "Pop"
+        1, 5, 9 -> "Science"
+        2, 6, 10 -> "Sports"
+        else -> "Rock"
     }
 
     fun wasCorrectlyAnswered(): Boolean {
@@ -133,8 +129,8 @@ class Game {
             if (currentPlayer1!!.isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
-                setPurse(currentPlayer)
-                val playerCoins = currentPlayerGoldCoins(currentPlayer1!!.name, getPurse(currentPlayer))
+                setPurse1(currentPlayer1!!)
+                val playerCoins = "${currentPlayer1!!.name} now has ${currentPlayer1!!.purse} Gold Coins."
                 println(playerCoins)
 
                 return didPlayerWin()
@@ -147,9 +143,9 @@ class Game {
         } else {
 
             println("Answer was corrent!!!!")
-            setPurse(currentPlayer)
+            setPurse1(currentPlayer1!!)
 
-            val playerCoins = currentPlayerGoldCoins(currentPlayer1!!.name, getPurse(currentPlayer))
+            val playerCoins = "${currentPlayer1!!.name} now has ${currentPlayer1!!.purse} Gold Coins."
             println(playerCoins)
             val winner = didPlayerWin()
 
@@ -159,9 +155,6 @@ class Game {
         }
     }
 
-    private fun currentPlayerGoldCoins(player: String, purse: Int): String {
-        return "$player now has $purse Gold Coins."
-    }
 
     /*
     * cardIndex = cardIndex + someStep
@@ -180,39 +173,27 @@ let card = deckOfCards[cardIndex]
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(currentPlayer1!!.name + " was sent to the penalty box")
-        putPlayerInPenaltyBox(currentPlayer)
+        putPlayerInPenaltyBox1(currentPlayer1!!)
 
         moveToNextPlayer()
         return true
     }
 
-    private fun moveToNextPlayer() {
-        currentPlayer++
-        currentPlayer %= players.size
-        /* currentPlayer++
-         if (currentPlayer == players.size) currentPlayer = 0*/
-    }
-
 
     private fun didPlayerWin(): Boolean {
         return currentPlayer1!!.purse != 6
-//        return getPurse(currentPlayer) != 6
     }
 
-    private fun putPlayerInPenaltyBox(index: Int) {
-        currentPlayer1!!.inPenaltyBox = true
-//        players[index].inPenaltyBox = true
+
+    private fun putPlayerInPenaltyBox1(player: Player) {
+        player.inPenaltyBox = true
     }
 
-    private fun setPurse(index: Int) {
-        currentPlayer1!!.purse++
-//        players[index].purse++
 
+    private fun setPurse1(player: Player) {
+        player.purse++
     }
 
-    private fun getPurse(index: Int): Int {
-        return currentPlayer1!!.purse
-//        return players[index].purse
-    }
+
 }
 
