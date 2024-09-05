@@ -3,6 +3,7 @@ package com.adaptionsoft.games.trivia
 
 import com.adaptionsoft.games.trivia.runner.GameRunner
 import com.adaptionsoft.games.uglytrivia.Game
+import com.adaptionsoft.games.uglytrivia.gameWith
 import org.approvaltests.Approvals
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -29,9 +30,8 @@ class GameTest {
 
     @Test
     fun `in given game must be at least 2 players`() {
-        val game = Game()
-        game.add("a")
         assertThrows<IllegalArgumentException> {
+            val game = gameWith("a")
             game.roll(4)
         }
     }

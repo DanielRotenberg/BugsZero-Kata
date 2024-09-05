@@ -2,7 +2,7 @@ package com.adaptionsoft.games.trivia.runner
 
 import java.util.Random
 
-import com.adaptionsoft.games.uglytrivia.Game
+import com.adaptionsoft.games.uglytrivia.gameWith
 
 
 object GameRunner {
@@ -17,12 +17,8 @@ object GameRunner {
     }
 
     fun playGame(rand: Random) {
-        val aGame = Game()
 
-        aGame.add("Chet")
-        aGame.add("Pat")
-        aGame.add("Sue")
-
+        val aGame = gameWith("Chet","Pat","Sue")
 
         do {
 
