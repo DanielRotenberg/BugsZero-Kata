@@ -13,6 +13,19 @@ class Player(
         if (place > 11) place -= 12
 
     }
+     fun didPlayerWin(): Boolean {
+        return purse != 6
+    }
+
+
+     fun putPlayerInPenaltyBox1() {
+        inPenaltyBox = true
+    }
+
+
+     fun setPurse1() {
+       purse++
+    }
 
 }
 
@@ -129,11 +142,12 @@ class Game {
             if (currentPlayer1!!.isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
                 moveToNextPlayer()
-                setPurse1(currentPlayer1!!)
+                currentPlayer1!!.setPurse1()
+//                setPurse1(currentPlayer1!!)
                 val playerCoins = "${currentPlayer1!!.name} now has ${currentPlayer1!!.purse} Gold Coins."
                 println(playerCoins)
 
-                return didPlayerWin()
+                return currentPlayer1!!.didPlayerWin()
             } else {
                 moveToNextPlayer()
                 return true
@@ -143,11 +157,12 @@ class Game {
         } else {
 
             println("Answer was corrent!!!!")
-            setPurse1(currentPlayer1!!)
+            currentPlayer1!!.setPurse1()
+//            setPurse1(currentPlayer1!!)
 
             val playerCoins = "${currentPlayer1!!.name} now has ${currentPlayer1!!.purse} Gold Coins."
             println(playerCoins)
-            val winner = didPlayerWin()
+            val winner = currentPlayer1!!.didPlayerWin()
 
             moveToNextPlayer()
 
@@ -173,27 +188,12 @@ let card = deckOfCards[cardIndex]
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(currentPlayer1!!.name + " was sent to the penalty box")
-        putPlayerInPenaltyBox1(currentPlayer1!!)
+        currentPlayer1!!.putPlayerInPenaltyBox1()
+//        putPlayerInPenaltyBox1(currentPlayer1!!)
 
         moveToNextPlayer()
         return true
     }
-
-
-    private fun didPlayerWin(): Boolean {
-        return currentPlayer1!!.purse != 6
-    }
-
-
-    private fun putPlayerInPenaltyBox1(player: Player) {
-        player.inPenaltyBox = true
-    }
-
-
-    private fun setPurse1(player: Player) {
-        player.purse++
-    }
-
 
 }
 
