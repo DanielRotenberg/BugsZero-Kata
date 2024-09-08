@@ -8,54 +8,22 @@ class Game(private val players: List<Player>) {
         createQuestionsOf(Category.Sports, 49),
         createQuestionsOf(Category.Rock, 49)
     )
+    private var currentPlayer = players[0]
 
-    fun moveToNextPLayer(currentPlayer: Player): Player {
+
+    private fun List<Player>.moveToNextPLayer(currentPlayer: Player): Player {
         val currentIndex = players.indexOf(currentPlayer)
 
         var newIndex = currentIndex + 1
-        newIndex %= players.size
-
-        return players[newIndex]
-    }
-
-    private var currentPlayer1: Player = players[0]
-
-
-    /*
-    *
-    private val playersTest = listOf<Player>()
-
-    private fun currentPlayer() {
-
-    }
-
-    private var player = Player("hello")
-
-    // pure function
-    private fun List<Player>.moveToNextPlayer(currentPlayer: Player): Player {
-        val currentPosition = indexOf(currentPlayer)
-
-        var newPosition = currentPosition + 1
-        newPosition %= size
-
-        return this[newPosition]
-
-    }
-    *
-    *
-    *
-    * */
-
-    private fun moveToNextPlayer(currentPosition: Int): Int {
-
-        var newPosition = currentPosition + 1
-        newPosition %= players.size
-
-        return newPosition
+        newIndex %= size
 
         /* currentPlayer++
          if (currentPlayer == players.size) currentPlayer = 0*/
+
+        return this[newIndex]
     }
+
+
 
     /*  val isPlayable: Boolean
           get() = howManyPlayers() >= 2*/
@@ -70,20 +38,19 @@ class Game(private val players: List<Player>) {
     private fun Int.isOdd() = !isEven()
 
     fun roll(roll: Int) {
-        require(players.size > 1)
-        println(currentPlayer1.name + " is the current player")
+        println(currentPlayer.name + " is the current player")
         println("They have rolled a $roll")
 
         when {
-            currentPlayer1.inPenaltyBox && roll.isEven() -> {
-                println(currentPlayer1.name + " is not getting out of the penalty box")
-                currentPlayer1.isGettingOutOfPenaltyBox = false
+            currentPlayer.inPenaltyBox && roll.isEven() -> {
+                println(currentPlayer.name + " is not getting out of the penalty box")
+                currentPlayer.isGettingOutOfPenaltyBox = false
             }
 
-            currentPlayer1.inPenaltyBox && roll.isOdd() -> {
-                currentPlayer1.isGettingOutOfPenaltyBox = true
+            currentPlayer.inPenaltyBox && roll.isOdd() -> {
+                currentPlayer.isGettingOutOfPenaltyBox = true
 
-                println(currentPlayer1.name + " is getting out of the penalty box")
+                println(currentPlayer.name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             }
 
@@ -97,12 +64,12 @@ class Game(private val players: List<Player>) {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        currentPlayer1.updatePlace(roll)
+        currentPlayer.updatePlace(roll)
 
-        println("${currentPlayer1.name}'s new location is ${currentPlayer1.place}")
-        println("The category is ${categoryByIndex(currentPlayer1.place)}")
+        println("${currentPlayer.name}'s new location is ${currentPlayer.place}")
+        println("The category is ${categoryByIndex(currentPlayer.place)}")
 
-        val question = askQuestion(currentPlayer1.place)
+        val question = askQuestion(currentPlayer.place)
         println(question)
     }
 
@@ -121,33 +88,31 @@ class Game(private val players: List<Player>) {
         * 3. not in penalty
         * */
         return when {
-            currentPlayer1.inPenaltyBox && currentPlayer1.isGettingOutOfPenaltyBox -> {
+            currentPlayer.inPenaltyBox && currentPlayer.isGettingOutOfPenaltyBox -> {
                 println("Answer was correct!!!!")
-                val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
-                currentPlayer1 = players[newPosition]
-                currentPlayer1.addCoin()
-                val playerCoins = "${currentPlayer1.name} now has ${currentPlayer1.coins} Gold Coins."
+
+                currentPlayer = players.moveToNextPLayer(currentPlayer)
+                currentPlayer.addCoin()
+                val playerCoins = "${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins."
                 println(playerCoins)
 
-                return currentPlayer1.didPlayerWin()
+                return currentPlayer.didPlayerWin()
             }
 
-            currentPlayer1.inPenaltyBox && !currentPlayer1.isGettingOutOfPenaltyBox -> {
-                val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
-                currentPlayer1 = players[newPosition]
+            currentPlayer.inPenaltyBox && !currentPlayer.isGettingOutOfPenaltyBox -> {
+                currentPlayer = players.moveToNextPLayer(currentPlayer)
                 return true
             }
 
             else -> {
                 println("Answer was corrent!!!!")
-                currentPlayer1.addCoin()
+                currentPlayer.addCoin()
 
-                val playerCoins = "${currentPlayer1.name} now has ${currentPlayer1.coins} Gold Coins."
+                val playerCoins = "${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins."
                 println(playerCoins)
-                val winner = currentPlayer1.didPlayerWin()
+                val winner = currentPlayer.didPlayerWin()
 
-                val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
-                currentPlayer1 = players[newPosition]
+                currentPlayer = players.moveToNextPLayer(currentPlayer)
 
                 return winner
             }
@@ -158,11 +123,10 @@ class Game(private val players: List<Player>) {
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(currentPlayer1.name + " was sent to the penalty box")
-        currentPlayer1.putInPenaltyBox()
+        println(currentPlayer.name + " was sent to the penalty box")
+        currentPlayer.putInPenaltyBox()
 
-        val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
-        currentPlayer1 = players[newPosition]
+        currentPlayer = players.moveToNextPLayer(currentPlayer)
         return true
     }
 
