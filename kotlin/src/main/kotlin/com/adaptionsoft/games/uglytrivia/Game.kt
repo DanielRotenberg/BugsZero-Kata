@@ -1,9 +1,6 @@
 package com.adaptionsoft.games.uglytrivia
 
-class Game() {
-
-
-     var players = mutableListOf<Player>()
+class Game(private val players: List<Player>) {
 
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
@@ -11,14 +8,51 @@ class Game() {
         createQuestionsOf(Category.Sports, 49),
         createQuestionsOf(Category.Rock, 49)
     )
-    private var currentPlayer = 0
-    private var currentPlayer1: Player? = null
-        get() = players[currentPlayer]
+
+    fun moveToNextPLayer(currentPlayer: Player): Player {
+        val currentIndex = players.indexOf(currentPlayer)
+
+        var newIndex = currentIndex + 1
+        newIndex %= players.size
+
+        return players[newIndex]
+    }
+
+    private var currentPlayer1: Player = players[0]
 
 
-    private fun moveToNextPlayer() {
-        currentPlayer++
-        currentPlayer %= players.size
+    /*
+    *
+    private val playersTest = listOf<Player>()
+
+    private fun currentPlayer() {
+
+    }
+
+    private var player = Player("hello")
+
+    // pure function
+    private fun List<Player>.moveToNextPlayer(currentPlayer: Player): Player {
+        val currentPosition = indexOf(currentPlayer)
+
+        var newPosition = currentPosition + 1
+        newPosition %= size
+
+        return this[newPosition]
+
+    }
+    *
+    *
+    *
+    * */
+
+    private fun moveToNextPlayer(currentPosition: Int): Int {
+
+        var newPosition = currentPosition + 1
+        newPosition %= players.size
+
+        return newPosition
+
         /* currentPlayer++
          if (currentPlayer == players.size) currentPlayer = 0*/
     }
@@ -31,34 +65,25 @@ class Game() {
         return type to List(questions) { index -> "$type Question $index" }.toMutableList()
     }
 
-/*    fun add(playerName: String): Boolean {
-
-        players.add(Player(name = playerName))
-
-        println("$playerName was added")
-        println("They are player number " + players.size)
-
-        return true
-    }*/
 
     private fun Int.isEven() = this % 2 == 0
     private fun Int.isOdd() = !isEven()
 
     fun roll(roll: Int) {
         require(players.size > 1)
-        println(currentPlayer1!!.name + " is the current player")
+        println(currentPlayer1.name + " is the current player")
         println("They have rolled a $roll")
 
         when {
-            currentPlayer1!!.inPenaltyBox && roll.isEven() -> {
-                println(currentPlayer1!!.name + " is not getting out of the penalty box")
-                currentPlayer1!!.isGettingOutOfPenaltyBox = false
+            currentPlayer1.inPenaltyBox && roll.isEven() -> {
+                println(currentPlayer1.name + " is not getting out of the penalty box")
+                currentPlayer1.isGettingOutOfPenaltyBox = false
             }
 
-            currentPlayer1!!.inPenaltyBox && roll.isOdd() -> {
-                currentPlayer1!!.isGettingOutOfPenaltyBox = true
+            currentPlayer1.inPenaltyBox && roll.isOdd() -> {
+                currentPlayer1.isGettingOutOfPenaltyBox = true
 
-                println(currentPlayer1!!.name + " is getting out of the penalty box")
+                println(currentPlayer1.name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             }
 
@@ -72,12 +97,12 @@ class Game() {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        currentPlayer1!!.updatePlace(roll)
+        currentPlayer1.updatePlace(roll)
 
-        println("${currentPlayer1!!.name}'s new location is ${currentPlayer1!!.place}")
-        println("The category is ${categoryByIndex(currentPlayer1!!.place)}")
+        println("${currentPlayer1.name}'s new location is ${currentPlayer1.place}")
+        println("The category is ${categoryByIndex(currentPlayer1.place)}")
 
-        val question = askQuestion(currentPlayer1!!.place)
+        val question = askQuestion(currentPlayer1.place)
         println(question)
     }
 
@@ -96,30 +121,33 @@ class Game() {
         * 3. not in penalty
         * */
         return when {
-            currentPlayer1!!.inPenaltyBox && currentPlayer1!!.isGettingOutOfPenaltyBox -> {
+            currentPlayer1.inPenaltyBox && currentPlayer1.isGettingOutOfPenaltyBox -> {
                 println("Answer was correct!!!!")
-                moveToNextPlayer()
-                currentPlayer1!!.addCoin()
-                val playerCoins = "${currentPlayer1!!.name} now has ${currentPlayer1!!.coins} Gold Coins."
+                val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
+                currentPlayer1 = players[newPosition]
+                currentPlayer1.addCoin()
+                val playerCoins = "${currentPlayer1.name} now has ${currentPlayer1.coins} Gold Coins."
                 println(playerCoins)
 
-                return currentPlayer1!!.didPlayerWin()
+                return currentPlayer1.didPlayerWin()
             }
 
-            currentPlayer1!!.inPenaltyBox && !currentPlayer1!!.isGettingOutOfPenaltyBox -> {
-                moveToNextPlayer()
+            currentPlayer1.inPenaltyBox && !currentPlayer1.isGettingOutOfPenaltyBox -> {
+                val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
+                currentPlayer1 = players[newPosition]
                 return true
             }
 
             else -> {
                 println("Answer was corrent!!!!")
-                currentPlayer1!!.addCoin()
+                currentPlayer1.addCoin()
 
-                val playerCoins = "${currentPlayer1!!.name} now has ${currentPlayer1!!.coins} Gold Coins."
+                val playerCoins = "${currentPlayer1.name} now has ${currentPlayer1.coins} Gold Coins."
                 println(playerCoins)
-                val winner = currentPlayer1!!.didPlayerWin()
+                val winner = currentPlayer1.didPlayerWin()
 
-                moveToNextPlayer()
+                val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
+                currentPlayer1 = players[newPosition]
 
                 return winner
             }
@@ -130,45 +158,32 @@ class Game() {
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(currentPlayer1!!.name + " was sent to the penalty box")
-        currentPlayer1!!.putInPenaltyBox()
+        println(currentPlayer1.name + " was sent to the penalty box")
+        currentPlayer1.putInPenaltyBox()
 
-        moveToNextPlayer()
+        val newPosition = moveToNextPlayer(players.indexOf(currentPlayer1))
+        currentPlayer1 = players[newPosition]
         return true
     }
 
 }
-
-
-
-
 
 
 //players >= 2 <= 6
-fun gameWith(vararg players: String): Game {
-    require(players.size in (2..6))
+fun gameWith(vararg playersNames: String): Game {
+    require(playersNames.size in (2..6))
 
-    players.forEachIndexed { index, name ->
+    playersNames.forEachIndexed { index, name ->
         println("$name was added")
         println("They are player number ${index.inc()}")
     }
-    val players1 = players.map { name -> Player(name) }.toMutableList()
 
-
-    return Game().apply { this.players = players1 }
+    val players = playersNames.map { name -> Player(name) }.toMutableList()
+    return Game(players)
 
 
 }
 
-/*
-*   players.add(Player(name = playerName))
-
-        println("$playerName was added")
-        println("They are player number " + players.size)
-
-        return true
-*
-* */
 
 /*
 * cardIndex = cardIndex + someStep
