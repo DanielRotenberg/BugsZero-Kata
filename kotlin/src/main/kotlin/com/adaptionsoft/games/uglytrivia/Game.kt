@@ -8,7 +8,7 @@ class Game(private val players: List<Player>) {
         createQuestionsOf(Category.Sports, 49),
         createQuestionsOf(Category.Rock, 49)
     )
-    private var currentPlayer = players[0]
+    private var player = players[0]
 
 
     private fun List<Player>.moveToNextPLayer(currentPlayer: Player): Player {
@@ -24,7 +24,6 @@ class Game(private val players: List<Player>) {
     }
 
 
-
     /*  val isPlayable: Boolean
           get() = howManyPlayers() >= 2*/
 
@@ -38,19 +37,19 @@ class Game(private val players: List<Player>) {
     private fun Int.isOdd() = !isEven()
 
     fun roll(roll: Int) {
-        println(currentPlayer.name + " is the current player")
+        println(player.name + " is the current player")
         println("They have rolled a $roll")
 
         when {
-            currentPlayer.inPenaltyBox && roll.isEven() -> {
-                println(currentPlayer.name + " is not getting out of the penalty box")
-                currentPlayer.isGettingOutOfPenaltyBox = false
+            player.inPenaltyBox && roll.isEven() -> {
+                println(player.name + " is not getting out of the penalty box")
+                player.isGettingOutOfPenaltyBox = false
             }
 
-            currentPlayer.inPenaltyBox && roll.isOdd() -> {
-                currentPlayer.isGettingOutOfPenaltyBox = true
+            player.inPenaltyBox && roll.isOdd() -> {
+                player.isGettingOutOfPenaltyBox = true
 
-                println(currentPlayer.name + " is getting out of the penalty box")
+                println(player.name + " is getting out of the penalty box")
                 movePlayerAndAskQuestion(roll)
             }
 
@@ -64,12 +63,12 @@ class Game(private val players: List<Player>) {
     }
 
     private fun movePlayerAndAskQuestion(roll: Int) {
-        currentPlayer.updatePlace(roll)
+        player.place = player.updatePlace(roll)
 
-        println("${currentPlayer.name}'s new location is ${currentPlayer.place}")
-        println("The category is ${categoryByIndex(currentPlayer.place)}")
+        println("${player.name}'s new location is ${player.place}")
+        println("The category is ${categoryByIndex(player.place)}")
 
-        val question = askQuestion(currentPlayer.place)
+        val question = askQuestion(player.place)
         println(question)
     }
 
@@ -88,31 +87,31 @@ class Game(private val players: List<Player>) {
         * 3. not in penalty
         * */
         return when {
-            currentPlayer.inPenaltyBox && currentPlayer.isGettingOutOfPenaltyBox -> {
+            player.inPenaltyBox && player.isGettingOutOfPenaltyBox -> {
                 println("Answer was correct!!!!")
 
-                currentPlayer = players.moveToNextPLayer(currentPlayer)
-                currentPlayer.addCoin()
-                val playerCoins = "${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins."
+                player = players.moveToNextPLayer(player)
+                player.addCoin()
+                val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
                 println(playerCoins)
 
-                return currentPlayer.didPlayerWin()
+                return player.didWin()
             }
 
-            currentPlayer.inPenaltyBox && !currentPlayer.isGettingOutOfPenaltyBox -> {
-                currentPlayer = players.moveToNextPLayer(currentPlayer)
+            player.inPenaltyBox && !player.isGettingOutOfPenaltyBox -> {
+                player = players.moveToNextPLayer(player)
                 return true
             }
 
             else -> {
                 println("Answer was corrent!!!!")
-                currentPlayer.addCoin()
+                player.addCoin()
 
-                val playerCoins = "${currentPlayer.name} now has ${currentPlayer.coins} Gold Coins."
+                val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
                 println(playerCoins)
-                val winner = currentPlayer.didPlayerWin()
+                val winner = player.didWin()
 
-                currentPlayer = players.moveToNextPLayer(currentPlayer)
+                player = players.moveToNextPLayer(player)
 
                 return winner
             }
@@ -123,10 +122,10 @@ class Game(private val players: List<Player>) {
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
-        println(currentPlayer.name + " was sent to the penalty box")
-        currentPlayer.putInPenaltyBox()
+        println(player.name + " was sent to the penalty box")
+        player.putInPenaltyBox()
 
-        currentPlayer = players.moveToNextPLayer(currentPlayer)
+        player = players.moveToNextPLayer(player)
         return true
     }
 
