@@ -7,7 +7,7 @@ import com.adaptionsoft.games.uglytrivia.gameWith
 
 object GameRunner {
 
-    private var notAWinner: Boolean = false
+    private var gameContinues: Boolean = false
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -25,12 +25,12 @@ object GameRunner {
             aGame.roll(rand.nextInt(5) + 1)
 
             if (rand.nextInt(9) == 7) {
-                notAWinner = aGame.wrongAnswer()
+                gameContinues = aGame.wrongAnswer()
             } else {
-                notAWinner = aGame.wasCorrectlyAnswered()
+                gameContinues = aGame.wasCorrectlyAnswered()
             }
 
 
-        } while (notAWinner)
+        } while (gameContinues)
     }
 }

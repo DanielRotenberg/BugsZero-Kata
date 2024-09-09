@@ -2,9 +2,6 @@ package com.adaptionsoft.games.uglytrivia
 
 class Game(private val players: List<Player>) {
 
-    private val messages = mutableListOf<String>()
-
-    private fun List<String>.printAll() = onEach { println(it) }.reduce { _, _ -> "" }
 
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
@@ -47,11 +44,10 @@ class Game(private val players: List<Player>) {
         when {
             player.inPenaltyBox && roll.isEven() -> {
                 println(player.name + " is not getting out of the penalty box")
-                player.isGettingOutOfPenaltyBox = false
             }
 
             player.inPenaltyBox && roll.isOdd() -> {
-                player.isGettingOutOfPenaltyBox = true
+                player.inPenaltyBox = false
                 println(player.name + " is getting out of the penalty box")
 
                 updateCategoryAndAskQuestion(roll)
@@ -84,53 +80,36 @@ class Game(private val players: List<Player>) {
 
 
     fun wasCorrectlyAnswered(): Boolean {
-
-        /*
-        * 1. in penalty && getting out
-        * 2. in penalty && not getting out
-        * 3. not in penalty
-        * */
-        return when {
-            player.inPenaltyBox && player.isGettingOutOfPenaltyBox -> {
-                println("Answer was correct!!!!")
-
-                player = players.moveToNextPLayer(player)
-                player.addCoin()
-
-                val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
-                println(playerCoins)
-
-                return player.didWin()
-            }
-
-            player.inPenaltyBox && !player.isGettingOutOfPenaltyBox -> {
-                player = players.moveToNextPLayer(player)
-                return true
-            }
-
-            else -> {
-                println("Answer was corrent!!!!")
-                player.addCoin()
-
-                val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
-                println(playerCoins)
-
-                val winner = player.didWin()
-
-                player = players.moveToNextPLayer(player)
-
-                return winner
-            }
+        return if (player.inPenaltyBox) {
+            player = players.moveToNextPLayer(player)
+            return true
+        } else {
+            return checkForWinner()
         }
 
+    }
+
+    private fun checkForWinner(): Boolean {
+        println("Answer was correct!!!!")
+        player.coins++
+
+        val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
+        println(playerCoins)
+
+        return if (player.didWin()) {
+            false
+        } else {
+            player = players.moveToNextPLayer(player)
+            true
+        }
     }
 
 
     fun wrongAnswer(): Boolean {
         println("Question was incorrectly answered")
         println(player.name + " was sent to the penalty box")
-        player.putInPenaltyBox()
 
+        player.inPenaltyBox = true
         player = players.moveToNextPLayer(player)
         return true
     }
