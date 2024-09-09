@@ -2,6 +2,10 @@ package com.adaptionsoft.games.uglytrivia
 
 class Game(private val players: List<Player>) {
 
+    private val messages = mutableListOf<String>()
+
+    private fun List<String>.printAll() = onEach { println(it) }.reduce { _, _ -> "" }
+
     private val questions: Map<Category, MutableList<String>> = mapOf(
         createQuestionsOf(Category.Pop, 49),
         createQuestionsOf(Category.Science, 49),
@@ -48,13 +52,13 @@ class Game(private val players: List<Player>) {
 
             player.inPenaltyBox && roll.isOdd() -> {
                 player.isGettingOutOfPenaltyBox = true
-
                 println(player.name + " is getting out of the penalty box")
-                movePlayerAndAskQuestion(roll)
+
+                updateCategoryAndAskQuestion(roll)
             }
 
             else -> {
-                movePlayerAndAskQuestion(roll)
+                updateCategoryAndAskQuestion(roll)
 
             }
         }
@@ -62,7 +66,7 @@ class Game(private val players: List<Player>) {
 
     }
 
-    private fun movePlayerAndAskQuestion(roll: Int) {
+    private fun updateCategoryAndAskQuestion(roll: Int) {
         player.place = player.updatePlace(roll)
 
         println("${player.name}'s new location is ${player.place}")
@@ -92,6 +96,7 @@ class Game(private val players: List<Player>) {
 
                 player = players.moveToNextPLayer(player)
                 player.addCoin()
+
                 val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
                 println(playerCoins)
 
@@ -109,6 +114,7 @@ class Game(private val players: List<Player>) {
 
                 val playerCoins = "${player.name} now has ${player.coins} Gold Coins."
                 println(playerCoins)
+
                 val winner = player.didWin()
 
                 player = players.moveToNextPLayer(player)
@@ -132,7 +138,6 @@ class Game(private val players: List<Player>) {
 }
 
 
-//players >= 2 <= 6
 fun gameWith(vararg playersNames: String): Game {
     require(playersNames.size in (2..6))
 
@@ -147,17 +152,11 @@ fun gameWith(vararg playersNames: String): Game {
 
 }
 
-
 /*
-* cardIndex = cardIndex + someStep
-if (cardIndex > cards.length) {
-cardIndex = 0
-}
-let card = cards[cardIndex]
-
-// Use of a modulo would be simpler and less error-prone.
-
-cardIndex = (cardIndex + someIndex) % deckOfCards.length
-let card = deckOfCards[cardIndex]
+* Existing BUG: A player that gets into prison always stays there. ** Other than just fixing the bug,
+* try to understand what's wrong with the design and fix the root cause
+*
+Existing BUG: coins are added to the wrong player.
+* Try to understand what made this bug likely and fix the design so that it becomes very unlikely.
 *
 * */
